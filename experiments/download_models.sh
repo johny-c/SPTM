@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 DIR_LIST="0102_L 0103_R 0104_L 0105_R"
 for dir in $DIR_LIST
 do

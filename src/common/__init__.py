@@ -1,6 +1,6 @@
-from constants import *
-from resnet import *
-from util import *
+from .constants import *
+from .resnet import *
+from .util import *
 
 # limit memory usage
 import tensorflow as tf

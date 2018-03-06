@@ -2,8 +2,8 @@
 import os
 import os.path
 
-import resnet
-from register_test_setups import (register_test_setups, DATA_PATH)
+from . import resnet
+from .register_test_setups import (register_test_setups, DATA_PATH)
 
 def get_from_env(name, type, default):
   value = os.environ.get(name)
@@ -16,7 +16,7 @@ def get_from_env(name, type, default):
       raise Exception('Unknown constant type!')
   else:
     returned_value = default
-  print name, '=', returned_value
+  print(name, '=', returned_value)
   return returned_value
 
 # test setups

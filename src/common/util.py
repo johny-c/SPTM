@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import cPickle
+import pickle
 import cv2
 import numpy as np
 import h5py
@@ -12,12 +12,12 @@ import git
 import random
 import scipy.misc
 
-from constants import *
-from video_writer import *
+from .constants import *
+from .video_writer import *
 
 import cv2
 import os
-import cPickle
+import pickle
 import numpy as np
 np.random.seed(DEFAULT_RANDOM_SEED)
 import keras
@@ -98,10 +98,10 @@ class StateRecorder():
             self.actions,
             self.rewards)
     with open(NAVIGATION_RECORDING_PATH, 'wb') as output_file:  
-      cPickle.dump(data, output_file)
+      pickle.dump(data, output_file)
 
 def downsample(input, factor):
-  for _ in xrange(factor):
+  for _ in range(factor):
     input = cv2.pyrDown(input)
   return input
 
@@ -139,7 +139,7 @@ def generator(x, y, batch_size, max_action_distance):
     number_of_samples = x.shape[0]
     x_list = []
     y_list = []
-    for index in xrange(batch_size):
+    for index in range(batch_size):
       choice = random.randint(0, number_of_samples - max_action_distance - 1)
       distance = random.randint(1, max_action_distance)
       current_x = x[choice]
@@ -179,14 +179,14 @@ class NavigationVideoWriter():
     side_by_side_screen = self.side_by_side(left, right)
     if not self.nonstop:
       if counter == 0:
-        for _ in xrange(START_PAUSE_FRAMES):
+        for _ in range(START_PAUSE_FRAMES):
           self.video_writer.add_frame(side_by_side_screen)
       elif counter + 1 < deep_net_actions:
         self.video_writer.add_frame(side_by_side_screen)
       else:
-        for _ in xrange(END_PAUSE_FRAMES):
+        for _ in range(END_PAUSE_FRAMES):
           self.video_writer.add_frame(side_by_side_screen)
-        for _ in xrange(DELIMITER_FRAMES):
+        for _ in range(DELIMITER_FRAMES):
           self.video_writer.add_frame(np.zeros_like(side_by_side_screen))
     else:
       self.video_writer.add_frame(side_by_side_screen)
@@ -231,7 +231,7 @@ def on_policy_online_generator(max_action_distance,
   while True:
     if yield_count >= MAX_YIELD_COUNT_BEFORE_RESTART:
       game.new_episode()
-      print 'New episode!'
+      print('New episode!')
       yield_count = 0
     total_distance = 0
     x_result = []
@@ -240,12 +240,12 @@ def on_policy_online_generator(max_action_distance,
       distance = random.randint(1, max_action_distance)
       total_distance += distance
       goal_screen = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
-      for _ in xrange(distance):
+      for _ in range(distance):
         action_index = random.randint(0, len(ACTIONS_LIST) - 1)
         game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
       start_screen = None
       y = None
-      for index in xrange(distance):
+      for index in range(distance):
         # action_index = random.randint(0, len(ACTIONS_LIST) - 1)
         # current_screen = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
         action_index, _, current_screen = current_make_deep_action(goal_screen, model, game, TRAIN_REPEAT, randomized=True)
@@ -254,17 +254,17 @@ def on_policy_online_generator(max_action_distance,
           y = action_index
       x_result.append(np.concatenate((start_screen, current_screen), axis=2))
       y_result.append(y)
-      for _ in xrange(distance):
+      for _ in range(distance):
         action_index = random.randint(0, len(ACTIONS_LIST) - 1)
         game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
-    permutation = range(len(x_result))
+    permutation = list(range(len(x_result)))
     random.shuffle(permutation)
     x_result = [x_result[index] for index in permutation]
     y_result = [y_result[index] for index in permutation]
     x_array = preprocess_images(np.array(x_result))
     y_array = keras.utils.to_categorical(np.array(y_result),
                                          num_classes=len(ACTIONS_LIST))
-    for index in xrange(0, len(x_result), batch_size):
+    for index in range(0, len(x_result), batch_size):
       yield_count += 1
       yield (x_array[index:(index + batch_size)],
              y_array[index:(index + batch_size)])
@@ -277,11 +277,11 @@ def unique_online_generator(max_action_distance,
   while True:
     if yield_count >= MAX_YIELD_COUNT_BEFORE_RESTART:
       game.new_episode()
-      print 'New episode!'
+      print('New episode!')
       yield_count = 0
     x = []
     y = []
-    for _ in xrange(max_continuous_play):
+    for _ in range(max_continuous_play):
       current_x = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
       action_index = random.randint(0, len(ACTIONS_LIST) - 1)
       game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
@@ -317,7 +317,7 @@ def unique_online_generator(max_action_distance,
 def explore(game, number_of_actions):
   is_left = random.random() > 0.5
   start_moving_straight = random.randint(0, number_of_actions)
-  for counter in xrange(number_of_actions):
+  for counter in range(number_of_actions):
     if counter >= start_moving_straight:
       action_index = INVERSE_ACTION_NAMES_INDEX['MOVE_FORWARD']
     else:
