@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import subprocess
 import os
 import time
@@ -19,7 +19,7 @@ def parse_param_string(param_string):
 
 def make_params_command(command_dict):
     params_command = ''
-    for k,v in command_dict.items():
+    for k,v in list(command_dict.items()):
         params_command += 'export {k}={v} ; '.format(k=k,v=v)
     return params_command
 
